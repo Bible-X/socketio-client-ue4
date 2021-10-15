@@ -19,7 +19,7 @@
 		{
 			"Name": "SocketIOClient",
 			"Type": "Runtime",
-			"LoadingPhase": "Default",
+			"LoadingPhase": "EarliestPossible",
 			"WhitelistPlatforms": [
 				"Win64",
 				"Linux",
