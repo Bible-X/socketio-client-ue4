@@ -63,7 +63,6 @@ namespace UnrealBuildTool.Rules
 
 			//Setup TLS support | Maybe other platforms work as well (untested)
 			if (Target.Platform == UnrealTargetPlatform.Win64 ||
-				Target.Platform == UnrealTargetPlatform.Win32 ||
 				Target.Platform == UnrealTargetPlatform.Mac ||
 				Target.Platform == UnrealTargetPlatform.IOS
 				)
