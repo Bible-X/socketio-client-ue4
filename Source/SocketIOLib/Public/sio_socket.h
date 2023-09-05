@@ -41,7 +41,7 @@ namespace sio
         friend class event_adapter;
     };
     
-    class client_impl;
+    class client_impl_base;
     class packet;
     
     //The name 'socket' is taken from concept of official socket.io.
@@ -75,9 +75,12 @@ namespace sio
         void emit(std::string const& name, message::list const& msglist = nullptr, std::function<void (message::list const&)> const& ack = nullptr);
         
         std::string const& get_namespace() const;
+
+        std::string const& get_socket_id() const;
         
+        socket(client_impl_base*,std::string const&,message::ptr const&);
+
     protected:
-        socket(client_impl*,std::string const&);
 
         void on_connected();
         
@@ -89,7 +92,7 @@ namespace sio
         
         void on_message_packet(packet const& p);
         
-        friend class client_impl;
+        friend class client_impl_base;
         
     private:
         //disable copy constructor and assign operator.

@@ -5,10 +5,12 @@
 
 FCUOpusCoder::FCUOpusCoder()
 {
+	/*
 #if WITH_OPUS
 	Encoder = nullptr;
 	Decoder = nullptr;
 #endif
+*/
 	SampleRate = 16000;
 	Channels = 1;
 	BitRate = 24000;
@@ -21,6 +23,7 @@ FCUOpusCoder::FCUOpusCoder()
 
 FCUOpusCoder::~FCUOpusCoder()
 {
+	/*
 #if WITH_OPUS
 	if (Encoder)
 	{
@@ -33,6 +36,7 @@ FCUOpusCoder::~FCUOpusCoder()
 		Decoder = nullptr;
 	}
 #endif
+*/
 }
 
 void FCUOpusCoder::SetSampleRate(int32 InSamplesPerSec)
@@ -72,6 +76,7 @@ bool FCUOpusCoder::EncodeStream(const TArray<uint8>& InPCMBytes, FCUOpusMinimalS
 	{
 		return false;
 	}
+	/*
 #if WITH_OPUS
 
 #if DEBUG_OPUS_LOG
@@ -125,6 +130,7 @@ bool FCUOpusCoder::EncodeStream(const TArray<uint8>& InPCMBytes, FCUOpusMinimalS
 #endif
 
 #endif //with opus
+*/
 
 	return true;
 }
@@ -135,6 +141,7 @@ bool FCUOpusCoder::DecodeStream(const FCUOpusMinimalStream& InStream, TArray<uin
 	{
 		return false;
 	}
+	/*
 #if WITH_OPUS
 
 #if DEBUG_OPUS_LOG
@@ -176,6 +183,7 @@ bool FCUOpusCoder::DecodeStream(const FCUOpusMinimalStream& InStream, TArray<uin
 #endif
 
 #endif
+*/
 	return true;
 }
 
@@ -226,23 +234,28 @@ bool FCUOpusCoder::DeserializeMinimal(const TArray<uint8>& InSerializedMinimalBy
 
 int32 FCUOpusCoder::EncodeFrame(const TArray<uint8>& InPCMFrame, TArray<uint8>& OutCompressed)
 {
+	/*
 #if WITH_OPUS
 	return opus_encode(Encoder, (const opus_int16*)InPCMFrame.GetData(), FrameSize, OutCompressed.GetData(), MaxPacketSize);
 #endif
+*/
 	return 0;
 }
 
 int32 FCUOpusCoder::DecodeFrame(const TArray<uint8>& InCompressedFrame, TArray<uint8>& OutPCMFrame)
 {
+	/*
 #if WITH_OPUS
 	return opus_decode(Decoder, InCompressedFrame.GetData(), InCompressedFrame.Num(), (opus_int16*)OutPCMFrame.GetData(), FrameSize, 0);
 #endif
+*/
 	return 0;
 }
 
 
 bool FCUOpusCoder::InitEncoderIfNeeded()
 {
+	/*
 #if WITH_OPUS
 
 	if (!Encoder)
@@ -268,20 +281,22 @@ bool FCUOpusCoder::InitEncoderIfNeeded()
 
 			//Turn on some settings
 			//opus_encoder_ctl(Encoder, OPUS_SET_BITRATE(BitRate));
-			/*opus_encoder_ctl(Encoder, OPUS_SET_VBR(1));				//variable bit rate encoding
-			opus_encoder_ctl(Encoder, OPUS_SET_VBR_CONSTRAINT(0));	//constrained VBR
-			opus_encoder_ctl(Encoder, OPUS_SET_COMPLEXITY(1));		//complexity
-			opus_encoder_ctl(Encoder, OPUS_SET_INBAND_FEC(0));		//forward error correction
-			*/
+			//opus_encoder_ctl(Encoder, OPUS_SET_VBR(1));				//variable bit rate encoding
+			//opus_encoder_ctl(Encoder, OPUS_SET_VBR_CONSTRAINT(0));	//constrained VBR
+			//opus_encoder_ctl(Encoder, OPUS_SET_COMPLEXITY(1));		//complexity
+			//opus_encoder_ctl(Encoder, OPUS_SET_INBAND_FEC(0));		//forward error correction
+			
 		}
 	}
 
 #endif
+*/
 	return true;
 }
 
 bool FCUOpusCoder::InitDecoderIfNeeded()
 {
+	/*
 #if WITH_OPUS
 	if (!Decoder)
 	{
@@ -294,11 +309,13 @@ bool FCUOpusCoder::InitDecoderIfNeeded()
 		}
 	}
 #endif
+*/
 	return true;
 }
 
 void FCUOpusCoder::ResetCoderIfInitialized()
 {
+	/*
 #if WITH_OPUS
 	if (Encoder)
 	{
@@ -313,11 +330,13 @@ void FCUOpusCoder::ResetCoderIfInitialized()
 		InitDecoderIfNeeded();
 	}
 #endif
+*/
 }
 
 //Debug utilities
 void FCUOpusCoder::DebugLogEncoder()
 {
+	/*
 #if WITH_OPUS
 	int32 ErrCode = 0;
 	int32 BitRateLocal = 0;
@@ -342,10 +361,12 @@ void FCUOpusCoder::DebugLogEncoder()
 	UE_LOG(LogTemp, Log, TEXT("- Vbr: %d"), Vbr);
 	UE_LOG(LogTemp, Log, TEXT("- Complexity: %d"), Complexity);
 #endif
+*/
 }
 
 void FCUOpusCoder::DebugLogDecoder()
 {
+	/*
 #if WITH_OPUS
 	int32 ErrCode = 0;
 	int32 Gain = 0;
@@ -358,10 +379,12 @@ void FCUOpusCoder::DebugLogDecoder()
 	UE_LOG(LogTemp, Log, TEXT("- Gain: %d"), Gain);
 	UE_LOG(LogTemp, Log, TEXT("- Pitch: %d"), Pitch);
 #endif
+*/
 }
 
 void FCUOpusCoder::DebugLogFrame(const uint8* PacketData, uint32 PacketLength, uint32 InSampleRate, bool bEncode)
 {
+	/*
 #if WITH_OPUS
 	// Frame Encoding see http://tools.ietf.org/html/rfc6716#section-3.1
 	int32 NumFrames = opus_packet_get_nb_frames(PacketData, PacketLength);
@@ -424,5 +447,6 @@ void FCUOpusCoder::DebugLogFrame(const uint8* PacketData, uint32 PacketLength, u
 			PacketLength, NumFrames, NumSamples, BandwidthStr, TOCEncoding, TOCStereo, TOCMode);
 	}
 #endif
+*/
 }
 

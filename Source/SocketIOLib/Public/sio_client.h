@@ -14,7 +14,7 @@
 
 namespace sio
 {
-    class client_impl;
+    class client_impl_base;
     
     class SOCKETIOLIB_API client {
     public:
@@ -33,6 +33,9 @@ namespace sio
         typedef std::function<void(std::string const& nsp)> socket_listener;
         
         client();
+
+        client(const bool bShouldUseTlsLibraries, const bool bShouldVerifyTLSCertificate);
+
         ~client();
         
         //set listeners and event bindings.
@@ -55,12 +58,15 @@ namespace sio
         void clear_socket_listeners();
         
         // Client Functions - such as send, etc.
+
+        void connect();
+
         void connect(const std::string& uri);
 
         void connect(const std::string& uri, const std::map<std::string,std::string>& query);
 
         void connect(const std::string& uri, const std::map<std::string,std::string>& query,
-                     const std::map<std::string,std::string>& http_extra_headers);
+                     const std::map<std::string,std::string>& http_extra_headers, const message::ptr& auth);
 
         void set_reconnect_attempts(int attempts);
 
@@ -97,7 +103,7 @@ namespace sio
         client(client const&){}
         void operator=(client const&){}
         
-        client_impl* m_impl;
+        client_impl_base* m_impl;
 
         std::string m_path;
     };

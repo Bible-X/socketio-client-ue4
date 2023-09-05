@@ -7,7 +7,9 @@
 #include "SIOJsonObject.h"
 #include "SIOJsonValue.h"
 #include "SIOJConvert.h"
+#include "SIOMessageConvert.h"
 #include "CoreMinimal.h"
+#include "JsonObjectWrapper.h"
 
 UENUM(BlueprintType)
 enum ESIOConnectionCloseReason
@@ -24,44 +26,28 @@ enum ESIOThreadOverrideOption
 	USE_NETWORK_THREAD
 };
 
-//Wrapper function for TFunctions which can be hashed based on pointers. I.e. no duplicate functions allowed
-//NB: Not currently used
-template <typename T>
-struct TSetFunctionWrapper
-{
-	T Function;
-
-	bool operator==(const TSetFunctionWrapper<T>& Other) const
-	{
-		return GetTypeHash(Other) == GetTypeHash(this);
-	}
-
-	friend FORCEINLINE uint32 GetTypeHash(const TSetFunctionWrapper<T>& Key)
-	{
-		return ::PointerHash(&Key);
-	}
-
-	TSetFunctionWrapper() {}
-	TSetFunctionWrapper(T InFunction)
-	{
-		Function = InFunction;
-	}
-};
-
-//used for early binds
+//Used in early (pre-connection) binds and maintaining map if re-setting connection type
 struct FSIOBoundEvent
 {
 	TFunction< void(const FString&, const TSharedPtr<FJsonValue>&)> Function;
 	FString Namespace;
-};
+	ESIOThreadOverrideOption ThreadOption;
 
+	FSIOBoundEvent()
+	{
+		Namespace = TEXT("/");
+		ThreadOption = USE_DEFAULT;
+	}
+};
 
 class SOCKETIOCLIENT_API FSocketIONative
 {
 public:
+	/** By default TLS verification is off. TLS mode will be set by URL on connect.*/
+	FSocketIONative(const bool bForceTLSMode = false, const bool bShouldVerifyTLSCertificate = false);
 
 	//Native Callbacks
-	TFunction<void(const FString& SessionId)> OnConnectedCallback;					//TFunction<void(const FString& SessionId)>
+	TFunction<void(const FString& SocketId, const FString& SessionId)> OnConnectedCallback;					//TFunction<void(const FString& SessionId)>
 	TFunction<void(const ESIOConnectionCloseReason Reason)> OnDisconnectedCallback;	//TFunction<void(const ESIOConnectionCloseReason Reason)>
 	TFunction<void(const FString& Namespace)> OnNamespaceConnectedCallback;			//TFunction<void(const FString& Namespace)>
 	TFunction<void(const FString& Namespace)> OnNamespaceDisconnectedCallback;		//TFunction<void(const FString& Namespace)>
@@ -71,8 +57,8 @@ public:
 	//Map for all native functions bound to this socket
 	TMap<FString, FSIOBoundEvent> EventFunctionMap;
 
-	/** Default connection address string in form e.g. http://localhost:80. */
-	FString AddressAndPort;
+	/** Address& Port, Path, Query, Headers, & Auth message */
+	FSIOConnectParams URLParams;
 
 	/** The number of attempts before giving up. 0 = infinity. Set before connecting*/
 	uint32 MaxReconnectionAttempts;
@@ -86,6 +72,9 @@ public:
 	/** When connected this session id will be valid and contain a unique Id. */
 	FString SessionId;
 
+	/** Each new connection is assigned a random 20-characters identifier. This identifier is synced with the value on the client-side. */
+	FString SocketId;
+
 	//This will remain valid even after we disconnect. Replaced on disconnect.
 	FString LastSessionId;
 
@@ -95,7 +84,17 @@ public:
 	/** If true, all callbacks and events will occur on game thread. Default true. */
 	bool bCallbackOnGameThread;
 
-	FSocketIONative();
+	/** Set true if connection currently configured for TLS */
+	bool bIsSetupForTLS;
+
+	/** If at initialization forcing is set true, it will use TLS despite URL used */
+	bool bForceTLSUse;
+
+	/** If true will attempt to verify certificate (NB: this currently doesn't work) */
+	bool bUsingTLSCertVerification;
+
+	/** If true all events are unbound on disconnect */
+	bool bUnbindEventsOnDisconnect;
 
 	/**
 	* Connect to a socket.io server, optional method if auto-connect is set to true.
@@ -104,7 +103,7 @@ public:
 	* @param AddressAndPort	the address in URL format with port
 	*
 	*/
-	void Connect(const FString& InAddressAndPort);
+	void Connect(const FString& InAddressAndPort = TEXT(""));
 
 	/**
 	* Connect to a socket.io server, optional method if auto-connect is set to true.
@@ -115,11 +114,7 @@ public:
 	* @param Headers http header as a SIOJsonObject with string keys and values
 	*
 	*/
-	void Connect(	
-		const FString& InAddressAndPort,
-		const TSharedPtr<FJsonObject>& Query, 
-		const TSharedPtr<FJsonObject>& Headers,
-		const FString& Path = "socket.io");
+	void Connect(const FSIOConnectParams& ConnectParams);
 
 	/** 
 	* Join a desired namespace. Keep in mind that emitting to a namespace will auto-join it
@@ -140,7 +135,7 @@ public:
 
 	void SyncDisconnect();
 
-	void ClearCallbacks();
+	void ClearAllCallbacks();
 
 	/**
 	* Emit an event with a JsonValue message
@@ -338,7 +333,8 @@ public:
 		ESIOThreadOverrideOption CallbackThread = USE_DEFAULT);
 
 	/**
-	* Call function callback on receiving raw event. C++ only.
+	* Call function callback on receiving raw event. C++ only. 
+	* NB: Does not get added to FSocketIONative event map (use OnEvent)!
 	*
 	* @param EventName	Event name
 	* @param TFunction	Lambda callback, raw flavor
@@ -350,14 +346,16 @@ public:
 		TFunction< void(const FString&, const sio::message::ptr&)> CallbackFunction,
 		const FString& Namespace = TEXT("/"),
 		ESIOThreadOverrideOption CallbackThread = USE_DEFAULT);
+
 	/**
 	* Call function callback on receiving binary event. C++ only.
+	* NB: Does not get added to FSocketIONative event map (use OnEvent)!
 	*
 	* @param EventName	Event name
 	* @param TFunction	Lambda callback, raw flavor
 	* @param Namespace	Optional namespace, defaults to default namespace
 	*/
-	void OnBinaryEvent(
+	void OnRawBinaryEvent(
 		const FString& EventName,
 		TFunction< void(const FString&, const TArray<uint8>&)> CallbackFunction,
 		const FString& Namespace = TEXT("/"));
@@ -370,7 +368,26 @@ public:
 	void UnbindEvent(const FString& EventName, const FString& Namespace = TEXT("/"));
 
 protected:
+
+	/** On disconnect or mode change bound events become invalid */
+	void ClearInternalCallbacks();
+
+	/** Linkup PrivateClient callbacks to FSocketIONative */
 	void SetupInternalCallbacks();
+
+	void RebindCurrentEventMap();
+
+	/** Checks for https prepend */
+	bool IsTLSURL(const FString& URL);
+
+	/** If non-matching mode, this will:
+	- close the connection
+	- clear and re-link internal callbacks
+	- re-construct PrivateClient in the correct mode
+	NB: URL preference overwritten if bForceTLSUse is true*/
+	void SyncPrivateClientToTLSMode(const FString& URL);
+
+	void InitPrivateClient(const bool bShouldUseTlsLibraries = false, const bool bShouldVerifyTLSCertificate = false);
 
 	TSharedPtr<sio::client> PrivateClient;
 };

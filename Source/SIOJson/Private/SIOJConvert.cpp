@@ -257,8 +257,8 @@ namespace
 		else if (FStructProperty *StructProperty = CastField<FStructProperty>(Property))
 		{
 			static const FName NAME_DateTime(TEXT("DateTime"));
-			static const FName NAME_Color(TEXT("Color"));
-			static const FName NAME_LinearColor(TEXT("LinearColor"));
+			static const FName NAME_Color_Local(TEXT("Color"));
+			static const FName NAME_LinearColor_Local(TEXT("LinearColor"));
 			if (JsonValue->Type == EJson::Object)
 			{
 				TSharedPtr<FJsonObject> Obj = JsonValue->AsObject();
@@ -269,7 +269,7 @@ namespace
 					return false;
 				}
 			}
-			else if (JsonValue->Type == EJson::String && StructProperty->Struct->GetFName() == NAME_LinearColor)
+			else if (JsonValue->Type == EJson::String && StructProperty->Struct->GetFName() == NAME_LinearColor_Local)
 			{
 				FLinearColor& ColorOut = *(FLinearColor*)OutValue;
 				FString ColorString = JsonValue->AsString();
@@ -328,14 +328,14 @@ namespace
 				if (!TheCppStructOps->ImportTextItem(ImportTextPtr, OutValue, PPF_None, nullptr, (FOutputDevice*)GWarn))
 				{
 					// Fall back to trying the tagged property approach if custom ImportTextItem couldn't get it done
-					Property->ImportText(ImportTextPtr, OutValue, PPF_None, nullptr);
+					Property->ImportText_Direct(ImportTextPtr, OutValue, nullptr, PPF_None);
 				}
 			}
 			else if (JsonValue->Type == EJson::String)
 			{
 				FString ImportTextString = JsonValue->AsString();
 				const TCHAR* ImportTextPtr = *ImportTextString;
-				Property->ImportText(ImportTextPtr, OutValue, PPF_None, nullptr);
+				Property->ImportText_Direct(ImportTextPtr, OutValue, nullptr, PPF_None);
 			}
 			else
 			{
@@ -355,7 +355,7 @@ namespace
 
 				UClass* PropertyClass = ObjectProperty->PropertyClass;
 				UObject* createdObj = StaticAllocateObject(PropertyClass, Outer, NAME_None, EObjectFlags::RF_NoFlags, EInternalObjectFlags::None, false);
-				(*PropertyClass->ClassConstructor)(FObjectInitializer(createdObj, PropertyClass->ClassDefaultObject, false, false));
+				(*PropertyClass->ClassConstructor)(FObjectInitializer(createdObj, PropertyClass->ClassDefaultObject, EObjectInitializerOptions::None));
 
 				ObjectProperty->SetObjectPropertyValue(OutValue, createdObj);
 
@@ -370,7 +370,7 @@ namespace
 			else if (JsonValue->Type == EJson::String)
 			{
 				// Default to expect a string for everything else
-				if (Property->ImportText(*JsonValue->AsString(), OutValue, 0, NULL) == NULL)
+				if (Property->ImportText_Direct(*JsonValue->AsString(), OutValue, nullptr, PPF_None) == nullptr)
 				{
 					UE_LOG(LogJson, Error, TEXT("BPEnumWA-JsonValueToUProperty - Unable import property type %s from string value for property %s"), *Property->GetClass()->GetName(), *Property->GetNameCPP());
 					return false;
@@ -380,7 +380,7 @@ namespace
 		else
 		{
 			// Default to expect a string for everything else
-			if (Property->ImportText(*JsonValue->AsString(), OutValue, 0, NULL) == NULL)
+			if (Property->ImportText_Direct(*JsonValue->AsString(), OutValue, nullptr, PPF_None) == nullptr)
 			{
 				UE_LOG(LogJson, Error, TEXT("BPEnumWA-JsonValueToUProperty - Unable import property type %s from string value for property %s"), *Property->GetClass()->GetName(), *Property->GetNameCPP());
 				return false;
@@ -649,14 +649,8 @@ TSharedPtr<FJsonValue> USIOJConvert::JsonStringToJsonValue(const FString& JsonSt
 	//Object
 	if (JsonString.StartsWith(FString(TEXT("{"))))
 	{
-		TSharedPtr< FJsonObject > JsonObject = MakeShareable(new FJsonObject);
-		TSharedRef< TJsonReader<> > Reader = TJsonReaderFactory<>::Create(*JsonString);
-		bool success = FJsonSerializer::Deserialize(Reader, JsonObject);
-
-		if (success)
-		{
-			return MakeShareable(new FJsonValueObject(JsonObject));
-		}
+		TSharedPtr< FJsonObject > JsonObject = ToJsonObject(JsonString);
+		return MakeShareable(new FJsonValueObject(JsonObject));
 	}
 
 	//Array
@@ -752,7 +746,7 @@ TSharedPtr<FJsonObject> USIOJConvert::ToJsonObject(UStruct* StructDefinition, vo
 					//Override default enum behavior by fetching display name text
 					UEnum* EnumDef = BPEnumProperty->Enum;
 
-					int32 IntValue = *(int32*)Value;
+					uint8 IntValue = *(uint8*)Value;
 
 					//It's an enum byte
 					if (EnumDef)
@@ -1086,10 +1080,4 @@ void USIOJConvert::ReplaceJsonValueNamesWithMap(TSharedPtr<FJsonValue>& JsonValu
 			ReplaceJsonValueNamesWithMap(Item, KeyMap);
 		}
 	}
-}
-
-FString USIOJConvert::EnumToString(const FString& enumName, const int32 value)
-{
-	UEnum* pEnum = FindObject<UEnum>(ANY_PACKAGE, *enumName);
-	return *(pEnum ? pEnum->GetNameStringByIndex(static_cast<uint8>(value)) : "null");
 }

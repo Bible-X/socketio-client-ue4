@@ -15,8 +15,8 @@ class FSocketIOClientModule : public ISocketIOClientModule
 {
 public:
 	//virtual TSharedPtr<FSocketIONative> NewValidNativePointer() override;
-	virtual TSharedPtr<FSocketIONative> NewValidNativePointer() override;
-	virtual TSharedPtr<FSocketIONative> ValidSharedNativePointer(FString SharedId) override;
+	virtual TSharedPtr<FSocketIONative> NewValidNativePointer(const bool bShouldUseTlsLibraries, const bool bShouldVerifyTLSCertificate) override;
+	virtual TSharedPtr<FSocketIONative> ValidSharedNativePointer(FString SharedId, const bool bShouldUseTlsLibraries, const bool bShouldVerifyTLSCertificate) override;
 	void ReleaseNativePointer(TSharedPtr<FSocketIONative> PointerToRelease) override;
 
 	/** IModuleInterface implementation */
@@ -79,9 +79,9 @@ void FSocketIOClientModule::ShutdownModule()
 	PluginNativePointers.Empty();
 }
 
-TSharedPtr<FSocketIONative> FSocketIOClientModule::NewValidNativePointer()
+TSharedPtr<FSocketIONative> FSocketIOClientModule::NewValidNativePointer(const bool bShouldUseTlsLibraries, const bool bShouldVerifyTLSCertificate)
 {
-	TSharedPtr<FSocketIONative> NewPointer = MakeShareable(new FSocketIONative);
+	TSharedPtr<FSocketIONative> NewPointer = MakeShareable(new FSocketIONative(bShouldUseTlsLibraries, bShouldVerifyTLSCertificate));
 	
 	PluginNativePointers.Add(NewPointer);
 	
@@ -90,7 +90,7 @@ TSharedPtr<FSocketIONative> FSocketIOClientModule::NewValidNativePointer()
 	return NewPointer;
 }
 
-TSharedPtr<FSocketIONative> FSocketIOClientModule::ValidSharedNativePointer(FString SharedId)
+TSharedPtr<FSocketIONative> FSocketIOClientModule::ValidSharedNativePointer(FString SharedId, const bool bShouldUseTlsLibraries, const bool bShouldVerifyTLSCertificate)
 {
 	//Found key? return it
 	if (SharedNativePointers.Contains(SharedId))
@@ -100,7 +100,7 @@ TSharedPtr<FSocketIONative> FSocketIOClientModule::ValidSharedNativePointer(FStr
 	//Otherwise request a new id and return it
 	else
 	{
-		TSharedPtr<FSocketIONative> NewNativePtr = NewValidNativePointer();
+		TSharedPtr<FSocketIONative> NewNativePtr = NewValidNativePointer(bShouldUseTlsLibraries, bShouldVerifyTLSCertificate);
 		SharedNativePointers.Add(SharedId, NewNativePtr);
 		AllSharedPtrs.Add(NewNativePtr);
 		return NewNativePtr;
@@ -124,7 +124,7 @@ void FSocketIOClientModule::ReleaseNativePointer(TSharedPtr<FSocketIONative> Poi
 	}
 
 	//Release the pointer on the background thread pool, this can take ~ 1 sec per connection
-	FCULambdaRunnable::RunLambdaOnBackGroundThreadPool([PointerToRelease, this]
+	FCULambdaRunnable::RunLambdaOnBackGroundThread([PointerToRelease, this]
 	{
 		if (PointerToRelease.IsValid())
 		{
