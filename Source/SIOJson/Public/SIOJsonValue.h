@@ -79,34 +79,34 @@ public:
 
 	/** Create new Json Number value
 	 * Attn.!! float used instead of double to make the function blueprintable! */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Construct Json Number Value", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"), Category = "SIOJ|Json")
+	UFUNCTION()
 	static USIOJsonValue* ConstructJsonValueNumber(UObject* WorldContextObject, float Number);
 
 	/** Create new Json String value */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Construct Json String Value", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"), Category = "SIOJ|Json")
+	UFUNCTION()
 	static USIOJsonValue* ConstructJsonValueString(UObject* WorldContextObject, const FString& StringValue);
 
 	/** Create new Json Bool value */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Construct Json Bool Value", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"), Category = "SIOJ|Json")
+	UFUNCTION()
 	static USIOJsonValue* ConstructJsonValueBool(UObject* WorldContextObject, bool InValue);
 
 	/** Create new Json Array value */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Construct Json Array Value", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"), Category = "SIOJ|Json")
+	UFUNCTION()
 	static USIOJsonValue* ConstructJsonValueArray(UObject* WorldContextObject, const TArray<USIOJsonValue*>& InArray);
 
 	/** Create new Json Object value */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Construct Json Object Value", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"), Category = "SIOJ|Json")
+	UFUNCTION()
 	static USIOJsonValue* ConstructJsonValueObject(USIOJsonObject *JsonObject, UObject* WorldContextObject);
 
 	/** Create new Json Binary value */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Construct Json Binary Value", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"), Category = "SIOJ|Json")
+	UFUNCTION()
 	static USIOJsonValue* ConstructJsonValueBinary(UObject* WorldContextObject, TArray<uint8> ByteArray);
 
 	/** Create new Json value from FJsonValue (to be used from USIOJsonObject) */
 	static USIOJsonValue* ConstructJsonValue(UObject* WorldContextObject, const TSharedPtr<FJsonValue>& InValue);
 
 	/** Create new Json value from JSON encoded string*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Value From Json String", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"), Category = "SIOJ|Json")
+	UFUNCTION()
 	static USIOJsonValue* ValueFromJsonString(UObject* WorldContextObject, const FString& StringValue);
 
 	/** Get the root Json value */
@@ -120,43 +120,43 @@ public:
 	// FJsonValue API
 
 	/** Get type of Json value (Enum) */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json")
+	UFUNCTION()
 	ESIOJson::Type GetType() const;
 
 	/** Get type of Json value (String) */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json")
+	UFUNCTION()
 	FString GetTypeString() const;
 
 	/** Returns true if this value is a 'null' */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json")
+	UFUNCTION()
 	bool IsNull() const;
 
 	/** Returns this value as a double, throwing an error if this is not an Json Number
 	 * Attn.!! float used instead of double to make the function blueprintable! */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json")
+	UFUNCTION()
 	float AsNumber() const;
 
 	/** Returns this value as a string, throwing an error if this is not an Json String */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json")
+	UFUNCTION()
 	FString AsString() const;
 
 	/** Returns this value as a boolean, throwing an error if this is not an Json Bool */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json")
+	UFUNCTION()
 	bool AsBool() const;
 
 	/** Returns this value as an array, throwing an error if this is not an Json Array */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json")
+	UFUNCTION()
 	TArray<USIOJsonValue*> AsArray() const;
 
 	/** Returns this value as an object, throwing an error if this is not an Json Object */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json")
+	UFUNCTION()
 	USIOJsonObject* AsObject();
 
 	//Convert message to binary data
-	UFUNCTION(BlueprintPure, Category = "SIOJ|Json")
+	UFUNCTION()
 	TArray<uint8> AsBinary();
 
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json")
+	UFUNCTION()
 	FString EncodeJson() const;
 
 	//////////////////////////////////////////////////////////////////////////

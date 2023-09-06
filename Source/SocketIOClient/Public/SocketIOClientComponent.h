@@ -28,7 +28,7 @@ public:
 	//Async events
 
 	/** On generic bound event received. Requires Bind Event to Generic Event to be called before. Will not receive Bind Event To Function events. */
-	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events")
+	UPROPERTY()
 	FSIOCEventJsonSignature OnGenericEvent;
 
 	/** Received on socket.io connection established. */

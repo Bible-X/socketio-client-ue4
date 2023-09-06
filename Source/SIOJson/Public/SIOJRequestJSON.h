@@ -93,36 +93,36 @@ public:
 	// Construction
 
 	/** Creates new request (totally empty) */
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Construct Json Request (Empty)", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"), Category = "SIOJ|Request")
+	UFUNCTION()
 	static USIOJRequestJSON* ConstructRequest(UObject* WorldContextObject);
 
 	/** Creates new request with defined verb and content type */
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Construct Json Request", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"), Category = "SIOJ|Request")
+	UFUNCTION()
 	static USIOJRequestJSON* ConstructRequestExt(UObject* WorldContextObject, ESIORequestVerb Verb, ESIORequestContentType ContentType);
 
 	/** Set verb to the request */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	void SetVerb(ESIORequestVerb Verb);
 
 	/** Set custom verb to the request */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	void SetCustomVerb(FString Verb);
 
 	/** Set content type to the request. If you're using the x-www-form-urlencoded, 
 	 * params/constaints should be defined as key=ValueString pairs from Json data */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	void SetContentType(ESIORequestContentType ContentType);
 
 	/** Set content type of the request for binary post data */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	void SetBinaryContentType(const FString &ContentType);
 
 	/** Set content of the request for binary post data */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	void SetBinaryRequestContent(const TArray<uint8> &Content);
 
 	/** Sets optional header info */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	void SetHeader(const FString& HeaderName, const FString& HeaderValue);
 
 
@@ -130,19 +130,19 @@ public:
 	// Destruction and reset
 
 	/** Reset all internal saved data */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility")
+	UFUNCTION()
 	void ResetData();
 
 	/** Reset saved request data */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	void ResetRequestData();
 
 	/** Reset saved response data */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response")
+	UFUNCTION()
 	void ResetResponseData();
 
 	/** Cancel latent response waiting  */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response")
+	UFUNCTION()
 	void Cancel();
 
 
@@ -150,19 +150,19 @@ public:
 	// JSON data accessors
 
 	/** Get the Request Json object */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	USIOJsonObject* GetRequestObject();
 
 	/** Set the Request Json object */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	void SetRequestObject(USIOJsonObject* JsonObject);
 
 	/** Get the Response Json object */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response")
+	UFUNCTION()
 	USIOJsonObject* GetResponseObject();
 
 	/** Set the Response Json object */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response")
+	UFUNCTION()
 	void SetResponseObject(USIOJsonObject* JsonObject);
 
 
@@ -170,34 +170,34 @@ public:
 	// Request/response data access
 
 	/** Get url of http request */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	FString GetURL();
 
 	/** Get status of http request */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	ESIORequestStatus GetStatus();
 
 	/** Get the response code of the last query */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response")
+	UFUNCTION()
 	int32 GetResponseCode();
 
 	/** Get value of desired response header */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response")
+	UFUNCTION()
 	FString GetResponseHeader(const FString HeaderName);
 	
 	/** Get list of all response headers */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response")
+	UFUNCTION()
 	TArray<FString> GetAllResponseHeaders();
 
 	//////////////////////////////////////////////////////////////////////////
 	// URL processing
 
 	/** Open URL with current setup */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request")
+	UFUNCTION()
 	virtual void ProcessURL(const FString& Url = TEXT("http://alyamkin.com"));
 
 	/** Open URL in latent mode */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta = (Latent, LatentInfo = "LatentInfo", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
+	UFUNCTION()
 	virtual void ApplyURL(const FString& Url, USIOJsonObject *&Result, UObject* WorldContextObject, struct FLatentActionInfo LatentInfo);
 
 	/** Apply current internal setup to request and process it */
@@ -215,11 +215,11 @@ private:
 
 public:
 	/** Event occured when the request has been completed */
-	UPROPERTY(BlueprintAssignable, Category = "SIOJ|Event")
+	UPROPERTY()
 	FOnRequestComplete OnRequestComplete;
 
 	/** Event occured when the request wasn't successfull */
-	UPROPERTY(BlueprintAssignable, Category = "SIOJ|Event")
+	UPROPERTY()
 	FOnRequestFail OnRequestFail;
 	
 	/** Event occured when the request has been completed */
@@ -234,7 +234,7 @@ public:
 
 public:
 	/** Add tag to this request */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility")
+	UFUNCTION()
 	void AddTag(FName Tag);
 
 	/** 
@@ -242,11 +242,11 @@ public:
 	 *
 	 * @return Number of removed elements 
 	 */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility")
+	UFUNCTION()
 	int32 RemoveTag(FName Tag);
 
 	/** See if this request contains the supplied tag */
-	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility")
+	UFUNCTION()
 	bool HasTag(FName Tag) const;
 
 protected:
@@ -259,15 +259,15 @@ protected:
 
 public:
 	/** Request response stored as a string */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SIOJ|Response")
+	UPROPERTY()
 	FString ResponseContent;
 
 	/** Is the response valid JSON? */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SIOJ|Response")
+	UPROPERTY()
 	bool bIsValidJsonResponse;
 
 	/** If this is true it will call back on the binary callback instead of json */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SIOJ|Response")
+	UPROPERTY()
 	bool bShouldHaveBinaryResponse;
 
 	TFunction<void(TArray<uint8>&)> OnProcessURLCompleteCallback;

@@ -22,6 +22,6 @@ public:
 	static USocketIOClientComponent* ConstructSocketIOComponent(UObject* WorldContextObject);
 
 	/** Call a function by name with SIOJsonValue signature. Utility for RPC in BPs*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Utility", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION()
 	static bool CallFunctionByName(const FString& FunctionName, UObject* Target, UObject* WorldContextObject, USIOJsonValue* Param);
 };

@@ -61,62 +61,62 @@ public:
 	/**
 	*	Convert any unicode bytes to string
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To String (Bytes)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static FString Conv_BytesToString(const TArray<uint8>& InBytes);
 
 	/**
 	*	Convert string to UTF8 bytes
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (String)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static TArray<uint8> Conv_StringToBytes(FString InString);
 
 	/**
 	*	Convert bytes to UTexture2D using auto-detection - optimized, but can still have performance implication
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Texture2D (Bytes)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static UTexture2D* Conv_BytesToTexture(const TArray<uint8>& InBytes);
 
 	/**
 	*	Audio decompression - Convert opus (currently raw serialized) to wav
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Wav Bytes (Opus Bytes)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static TArray<uint8> Conv_OpusBytesToWav(const TArray<uint8>& InBytes);
 
 	/**
 	*	Audio compression - Convert wav to opus (currently raw serialized)
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Opus Bytes (Wav Bytes)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static TArray<uint8> Conv_WavBytesToOpus(const TArray<uint8>& InBytes);
 
 	/**
 	*	Assumes .wav chunks - handles async alloc, callable from any thread
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To SoundWave (Wav Bytes)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static USoundWave* Conv_WavBytesToSoundWave(const TArray<uint8>& InBytes);
 
 	/**
 	*	convert a soundwave into wav bytes
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (SoundWave)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static TArray<uint8> Conv_SoundWaveToWavBytes(USoundWave* SoundWave);
 
 
 	/** 
 	* Compact Transform bytes are [[pitch,yaw,roll,x,y,z,sx,sy,sz],...]
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Transforms (Bytes)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static void Conv_CompactBytesToTransforms(const TArray<uint8>& InCompactBytes, TArray<FTransform>& OutTransforms);
 
 	/** 
 	* Compact Position bytes are [[x,y,z],...]
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Transforms (Location Bytes)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static void Conv_CompactPositionBytesToTransforms(const TArray<uint8>& InCompactBytes, TArray<FTransform>& OutTransforms);
 
 	/**
 	*	Sets and updates soundwave if needed from incoming bytes. Callable on background threads
 	*/
-	UFUNCTION(BlueprintCallable, Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static void SetSoundWaveFromWavBytes(USoundWaveProcedural* InSoundWave, const TArray<uint8>& InBytes);
 
 	/**
@@ -127,37 +127,37 @@ public:
 	/**
 	*	Convert UTexture2D to bytes in given format - can have performance implication
 	*/
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (Texture2D)", BlueprintAutocast), Category = "CoreUtility|Conversion")
+	UFUNCTION()
 	static bool Conv_TextureToBytes(UTexture2D* Texture, TArray<uint8>& OutBuffer, EImageFormatBPType Format = EImageFormatBPType::PNG);
 
 	/**
 	*	Current UTC time in string format
 	*/
-	UFUNCTION(BlueprintPure, Category = "CoreUtility|Misc")
+	UFUNCTION()
 	static FString NowUTCString();
 
 	/**
 	* Returns a type of Unique Hardware ID
 	*/
-	UFUNCTION(BlueprintPure, Category = "CoreUtility|Misc")
+	UFUNCTION()
 	static FString GetLoginId();
 
 	/** 
 	* Return a somewhat unique int for given string
 	*/
-	UFUNCTION(BlueprintPure, Category = "CoreUtility|Misc")
+	UFUNCTION()
 	static int32 ToHashCode(const FString& String);
 
 	/**
 	* Time inter-tick durations for simple
 	*/
-	UFUNCTION(BlueprintCallable, Category = "CoreUtility|Misc")
+	UFUNCTION()
 	static void MeasureTimerStart(const FString& Category = TEXT("TimeTaken"));
 
 	/** 
 	* Stops the timer started for this category and returns the duration taken in milliseconds 
 	*/
-	UFUNCTION(BlueprintCallable, Category = "CoreUtility|Misc")
+	UFUNCTION()
 	static float MeasureTimerStop(const FString& Category = TEXT("TimeTaken"), bool bShouldLogResult = true);
 
 	/** 
@@ -165,13 +165,13 @@ public:
 	*	or use game thread callback for threadtype. This allows you to run certain functions on a background thread or
 	*	taskgraph in blueprints. Keep in mind that you should not create or destroy UObjects non-game threads.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "CoreUtility|Threading", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION()
 	static void CallFunctionOnThread(const FString& Function, ESIOCallbackType ThreadType, UObject* WorldContextObject = nullptr);
 
 	/**
 	*	Calls specified function on thread type with a latent graph return. This allows you to run certain functions on a background thread or
 	*	taskgraph in blueprints. Keep in mind that you should not create or destroy UObjects non-game threads.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "CoreUtility|Threading", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject"))
+	UFUNCTION()
 	static void CallFunctionOnThreadGraphReturn(const FString& Function, ESIOCallbackType ThreadType, struct FLatentActionInfo LatentInfo, UObject* WorldContextObject = nullptr);
 };

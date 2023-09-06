@@ -32,13 +32,13 @@ struct FSIOJ_NamedType
 {
 	GENERATED_USTRUCT_BODY();
 
-	UPROPERTY(EditAnywhere, Category = NamedType)
+	UPROPERTY()
 	FString Name;
 
-	UPROPERTY(EditAnywhere, Category = NamedType)
+	UPROPERTY()
 	ESIOJ_JsonType Type = ESIOJ_JsonType::JSON_Bool;
 
-	UPROPERTY(EditAnywhere, Category = NamedType)
+	UPROPERTY()
 	bool bIsArray = false;
 };
 
