@@ -293,7 +293,7 @@ public:
 	* @param Namespace		Optional namespace, defaults to default namespace
 	* @param ThreadOverride	Optional override to receive event on specified thread. Note NETWORK thread is lower latency but unsafe for a lot of blueprint use. Use with CAUTION.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta = (WorldContext = "WorldContextObject", DeprecatedFunction))
 	void BindEventToFunction(	const FString& EventName,
 								const FString& FunctionName,
 								UObject* Target,
