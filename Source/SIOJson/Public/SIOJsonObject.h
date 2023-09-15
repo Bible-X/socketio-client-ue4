@@ -14,17 +14,17 @@ class USIOJsonValue;
 /**
  * Blueprintable FJsonObject wrapper
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable, meta=(DeprecatedNode))
 class SIOJSON_API USIOJsonObject : public UObject
 {
 	GENERATED_UCLASS_BODY()
 
 	/** Create new Json object, cannot be pure  */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable , meta = (DisplayName = "Construct Json Object", KeyWords = "create make", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject", DeprecatedFunction), Category = "SIOJ|Json")
 	static USIOJsonObject* ConstructJsonObject(UObject* WorldContextObject);
 
 	/** Reset all internal data */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void Reset();
 
 	/** Get the root Json object */
@@ -38,15 +38,15 @@ class SIOJSON_API USIOJsonObject : public UObject
 	// Serialization
 
 	/** Serialize Json to string (formatted with line breaks) */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	FString EncodeJson() const;
 
 	/** Serialize Json to string (single string without line breaks) */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	FString EncodeJsonToSingleString() const;
 
 	/** Construct Json object from string */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	bool DecodeJson(const FString& JsonString);
 
 
@@ -54,35 +54,35 @@ class SIOJSON_API USIOJsonObject : public UObject
 	// FJsonObject API
 
 	/** Returns a list of field names that exist in the object */
-	UFUNCTION()
+	UFUNCTION(BlueprintPure, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	TArray<FString> GetFieldNames();
 
 	/** Checks to see if the FieldName exists in the object */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	bool HasField(const FString& FieldName) const;
 
 	/** Remove field named FieldName */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void RemoveField(const FString& FieldName);
 
 	/** Get the field named FieldName as a JsonValue */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	USIOJsonValue* GetField(const FString& FieldName) const;
 
 	/** Add a field named FieldName with a Value */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetField(const FString& FieldName, USIOJsonValue* JsonValue);
 
 	/** Get the field named FieldName as a Json Array */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	TArray<USIOJsonValue*> GetArrayField(const FString& FieldName);
 
 	/** Set an ObjectField named FieldName and value of Json Array */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetArrayField(const FString& FieldName, const TArray<USIOJsonValue*>& InArray);
 	
 	/** Adds all of the fields from one json object to this one */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void MergeJsonObject(USIOJsonObject* InJsonObject, bool Overwrite);
 
 
@@ -91,44 +91,44 @@ class SIOJSON_API USIOJsonObject : public UObject
 
 	/** Get the field named FieldName as a number. Ensures that the field is present and is of type Json number.
 	 * Attn.!! float used instead of double to make the function blueprintable! */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	float GetNumberField(const FString& FieldName) const;
 
 	/** Add a field named FieldName with Number as value
 	 * Attn.!! float used instead of double to make the function blueprintable! */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetNumberField(const FString& FieldName, float Number);
 
 	/** Get the field named FieldName as a string. */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	FString GetStringField(const FString& FieldName) const;
 
 	/** Add a field named FieldName with value of StringValue */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetStringField(const FString& FieldName, const FString& StringValue);
 
 	/** Get the field named FieldName as a boolean. */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	bool GetBoolField(const FString& FieldName) const;
 
 	/** Set a boolean field named FieldName and value of InValue */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetBoolField(const FString& FieldName, bool InValue);
 
 	/** Get the field named FieldName as a Json object. */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	USIOJsonObject* GetObjectField(const FString& FieldName) const;
 
 	/** Set an ObjectField named FieldName and value of JsonObject */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetObjectField(const FString& FieldName, USIOJsonObject* JsonObject);
 
 	/** Get the field named FieldName as a binary buffer array. */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void GetBinaryField(const FString& FieldName, TArray<uint8>& OutBinary) const;
 
 	/** Set an BinaryField named FieldName and binary buffer array */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetBinaryField(const FString& FieldName, const TArray<uint8>& Bytes);
 
 
@@ -137,36 +137,36 @@ class SIOJSON_API USIOJsonObject : public UObject
 
 	/** Get the field named FieldName as a Number Array. Use it only if you're sure that array is uniform!
 	 * Attn.!! float used instead of double to make the function blueprintable! */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	TArray<float> GetNumberArrayField(const FString& FieldName);
 
 	/** Set an ObjectField named FieldName and value of Number Array
 	 * Attn.!! float used instead of double to make the function blueprintable! */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetNumberArrayField(const FString& FieldName, const TArray<float>& NumberArray);
 
 	/** Get the field named FieldName as a String Array. Use it only if you're sure that array is uniform! */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	TArray<FString> GetStringArrayField(const FString& FieldName);
 
 	/** Set an ObjectField named FieldName and value of String Array */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetStringArrayField(const FString& FieldName, const TArray<FString>& StringArray);
 
 	/** Get the field named FieldName as a Bool Array. Use it only if you're sure that array is uniform! */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	TArray<bool> GetBoolArrayField(const FString& FieldName);
 
 	/** Set an ObjectField named FieldName and value of Bool Array */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetBoolArrayField(const FString& FieldName, const TArray<bool>& BoolArray);
 
 	/** Get the field named FieldName as an Object Array. Use it only if you're sure that array is uniform! */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	TArray<USIOJsonObject*> GetObjectArrayField(const FString& FieldName);
 
 	/** Set an ObjectField named FieldName and value of Ob Array */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Json", meta=(DeprecatedFunction))
 	void SetObjectArrayField(const FString& FieldName, const TArray<USIOJsonObject*>& ObjectArray);
 
 

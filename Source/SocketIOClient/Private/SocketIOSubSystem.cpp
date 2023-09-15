@@ -1,18 +1,16 @@
-// Copyright 2018-current Getnamo. All Rights Reserved
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SocketIOClientComponent.h"
+#include "SocketIOSubSystem.h"
+//#include "SocketIOClientComponent.h"
 #include "SIOJConvert.h"
 #include "SIOMessageConvert.h"
 #include "SIOJRequestJSON.h"
 #include "SocketIOClient.h"
 #include "Engine/Engine.h"
 
-
-USocketIOClientComponent::USocketIOClientComponent(const FObjectInitializer &init) : UActorComponent(init)
+USocketIOSubSystem::USocketIOSubSystem()
 {
-	bWantsInitializeComponent = true;
-	bAutoActivate = true;
 
 	bForceTLS = false;
 	bUnbindEventsOnDisconnect = false;
@@ -35,7 +33,54 @@ USocketIOClientComponent::USocketIOClientComponent(const FObjectInitializer &ini
 	ClearCallbacks();
 }
 
-void USocketIOClientComponent::StaticInitialization(UObject* WorldContextObject, bool bValidOwnerWorld /*= false*/)
+void USocketIOSubSystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	if (!bStaticallyInitialized)
+	{
+		InitializeNative();
+	}
+
+	//Auto-connect to default address if supported and not already connected
+	if (bShouldAutoConnect && !bIsConnected)
+	{
+		ConnectWithParams(URLParams);
+	}
+}
+
+void USocketIOSubSystem::Deinitialize()
+{
+	//Because our connections can last longer than game world 
+	//end, we let plugin-scoped structures manage our memory.
+	//We must ensure we set our pointer to null however.
+
+	ClearCallbacks();
+
+	//If we're a regular connection we should close and release when we quit
+	if (!bPluginScopedConnection)
+	{
+		ISocketIOClientModule::Get().ReleaseNativePointer(NativeClient);
+		NativeClient = nullptr;
+	}
+	
+	Super::Deinitialize();
+}
+
+USocketIOSubSystem::~USocketIOSubSystem()
+{
+	ClearCallbacks();
+
+	//If we're a regular connection we should close and release when we quit
+	if (!bPluginScopedConnection && NativeClient.IsValid())
+	{
+		ISocketIOClientModule::Get().ReleaseNativePointer(NativeClient);
+		NativeClient = nullptr;
+	}
+}
+
+
+void USocketIOSubSystem::StaticInitialization(UObject* WorldContextObject, bool bValidOwnerWorld /*= false*/)
 {
 	bStaticallyInitialized = true;
 
@@ -52,17 +97,7 @@ void USocketIOClientComponent::StaticInitialization(UObject* WorldContextObject,
 	InitializeNative();
 }
 
-void USocketIOClientComponent::InitializeComponent()
-{
-	Super::InitializeComponent();
-
-	if (!bStaticallyInitialized)
-	{
-		InitializeNative();
-	}
-}
-
-void USocketIOClientComponent::InitializeNative()
+void USocketIOSubSystem::InitializeNative()
 {
 	if (bPluginScopedConnection)
 	{
@@ -79,48 +114,7 @@ void USocketIOClientComponent::InitializeNative()
 	SetupCallbacks();
 }
 
-void USocketIOClientComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//Auto-connect to default address if supported and not already connected
-	if (bShouldAutoConnect && !bIsConnected)
-	{
-		ConnectWithParams(URLParams);
-	}
-}
-
-USocketIOClientComponent::~USocketIOClientComponent()
-{
-	ClearCallbacks();
-
-	//If we're a regular connection we should close and release when we quit
-	if (!bPluginScopedConnection && NativeClient.IsValid())
-	{
-		ISocketIOClientModule::Get().ReleaseNativePointer(NativeClient);
-		NativeClient = nullptr;
-	}
-}
-
-void USocketIOClientComponent::UninitializeComponent()
-{
-	//Because our connections can last longer than game world 
-	//end, we let plugin-scoped structures manage our memory.
-	//We must ensure we set our pointer to null however.
-
-	ClearCallbacks();
-
-	//If we're a regular connection we should close and release when we quit
-	if (!bPluginScopedConnection)
-	{
-		ISocketIOClientModule::Get().ReleaseNativePointer(NativeClient);
-		NativeClient = nullptr;
-	}
-
-	Super::UninitializeComponent();
-}
-
-void USocketIOClientComponent::SetupCallbacks()
+void USocketIOSubSystem::SetupCallbacks()
 {
 	//Sync current connected state
 	bIsConnected = NativeClient->bIsConnected;
@@ -144,7 +138,7 @@ void USocketIOClientComponent::SetupCallbacks()
 		}
 	};
 
-	const FSIOCCloseEventSignature OnDisconnectedSafe = OnDisconnected;
+	const FSIOCSubSystemCloseEventSignature OnDisconnectedSafe = OnDisconnected;
 
 	NativeClient->OnDisconnectedCallback = [OnDisconnectedSafe, this](const ESIOConnectionCloseReason Reason)
 	{
@@ -163,7 +157,7 @@ void USocketIOClientComponent::SetupCallbacks()
 		}
 	};
 
-	const FSIOCSocketEventSignature OnSocketNamespaceDisconnectedSafe = OnSocketNamespaceDisconnected;
+	const FSIOCSubSystemSocketEventSignature OnSocketNamespaceDisconnectedSafe = OnSocketNamespaceDisconnected;
 
 	NativeClient->OnNamespaceDisconnectedCallback = [this, OnSocketNamespaceDisconnectedSafe](const FString& Namespace)
 	{
@@ -205,7 +199,7 @@ void USocketIOClientComponent::SetupCallbacks()
 	};
 }
 
-void USocketIOClientComponent::ClearCallbacks()
+void USocketIOSubSystem::ClearCallbacks()
 {
 	if (NativeClient.IsValid())
 	{
@@ -214,7 +208,7 @@ void USocketIOClientComponent::ClearCallbacks()
 }
 
 
-bool USocketIOClientComponent::CallBPFunctionWithResponse(UObject* Target, const FString& FunctionName, TArray<TSharedPtr<FJsonValue>> Response)
+bool USocketIOSubSystem::CallBPFunctionWithResponse(UObject* Target, const FString& FunctionName, TArray<TSharedPtr<FJsonValue>> Response)
 {
 	if (!Target->IsValidLowLevel())
 	{
@@ -351,7 +345,7 @@ bool USocketIOClientComponent::CallBPFunctionWithResponse(UObject* Target, const
 	return false;
 }
 
-bool USocketIOClientComponent::CallBPFunctionWithMessage(UObject* Target, const FString& FunctionName, TSharedPtr<FJsonValue> Message)
+bool USocketIOSubSystem::CallBPFunctionWithMessage(UObject* Target, const FString& FunctionName, TSharedPtr<FJsonValue> Message)
 {
 	TArray<TSharedPtr<FJsonValue>> Response;
 	Response.Add(Message);
@@ -363,7 +357,7 @@ bool USocketIOClientComponent::CallBPFunctionWithMessage(UObject* Target, const 
 #pragma region Connect
 #endif
 
-void USocketIOClientComponent::Connect(const FString& InAddressAndPort, const FString& InPath, const FString& InAuthToken, USIOJsonObject* Query /*= nullptr*/, USIOJsonObject* Headers /*= nullptr*/)
+void USocketIOSubSystem::Connect(const FString& InAddressAndPort, const FString& InPath, const FString& InAuthToken, USIOJsonObject* Query /*= nullptr*/, USIOJsonObject* Headers /*= nullptr*/)
 {
 	//Check if we're limiting this component
 	if (bLimitConnectionToGameWorld)
@@ -423,12 +417,12 @@ void USocketIOClientComponent::Connect(const FString& InAddressAndPort, const FS
 	ConnectWithParams(URLParams);
 }
 
-void USocketIOClientComponent::ConnectWithParams(const FSIOConnectParams& InURLParams)
+void USocketIOSubSystem::ConnectWithParams(const FSIOConnectParams& InURLParams)
 {
 	NativeClient->Connect(InURLParams);
 }
 
-void USocketIOClientComponent::ConnectNative(const FString& InAddressAndPort, 
+void USocketIOSubSystem::ConnectNative(const FString& InAddressAndPort, 
 	const FString& InPath,
 	const FString& InAuthToken,
 	const TSharedPtr<FJsonObject>& Query /*= nullptr*/, 
@@ -445,22 +439,22 @@ void USocketIOClientComponent::ConnectNative(const FString& InAddressAndPort,
 	ConnectWithParams(Params);
 }
 
-void USocketIOClientComponent::Disconnect()
+void USocketIOSubSystem::Disconnect()
 {
 	NativeClient->Disconnect();
 }
 
-void USocketIOClientComponent::SyncDisconnect()
+void USocketIOSubSystem::SyncDisconnect()
 {
 	NativeClient->SyncDisconnect();
 }
 
-void USocketIOClientComponent::JoinNamespace(const FString& Namespace)
+void USocketIOSubSystem::JoinNamespace(const FString& Namespace)
 {
 	NativeClient->JoinNamespace(Namespace);
 }
 
-void USocketIOClientComponent::LeaveNamespace(const FString& Namespace)
+void USocketIOSubSystem::LeaveNamespace(const FString& Namespace)
 {
 	NativeClient->LeaveNamespace(Namespace);
 }
@@ -470,23 +464,12 @@ void USocketIOClientComponent::LeaveNamespace(const FString& Namespace)
 #pragma region Emit
 #endif
 
-void USocketIOClientComponent::Emit(const FString& EventName, USIOJsonValue* Message, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::Emit(const FString& EventName, const FJsonObjectWrapper& Message, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
-	//Set the message is not null
-	TSharedPtr<FJsonValue> JsonMessage = nullptr;
-	if (Message != nullptr)
-	{
-		JsonMessage = Message->GetRootValue();
-	}
-	else
-	{
-		JsonMessage = MakeShareable(new FJsonValueNull);
-	}
-
-	NativeClient->Emit(EventName, JsonMessage, nullptr, Namespace);
+	NativeClient->Emit(EventName, Message.JsonObject, nullptr, Namespace);
 }
 
-void USocketIOClientComponent::EmitWithCallBack(const FString& EventName, USIOJsonValue* Message /*= nullptr*/, const FString& CallbackFunctionName /*= FString(TEXT(""))*/, UObject* Target /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/, UObject* WorldContextObject /*= nullptr*/)
+void USocketIOSubSystem::EmitWithCallBack(const FString& EventName, USIOJsonValue* Message /*= nullptr*/, const FString& CallbackFunctionName /*= FString(TEXT(""))*/, UObject* Target /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/, UObject* WorldContextObject /*= nullptr*/)
 {
 	if (!CallbackFunctionName.IsEmpty())
 	{
@@ -517,7 +500,7 @@ void USocketIOClientComponent::EmitWithCallBack(const FString& EventName, USIOJs
 	}
 }
 
-void USocketIOClientComponent::EmitWithGraphCallBack(const FString& EventName, struct FLatentActionInfo LatentInfo, USIOJsonValue*& Result, USIOJsonValue* Message /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitWithGraphCallBack(const FString& EventName, struct FLatentActionInfo LatentInfo, USIOJsonValue*& Result, USIOJsonValue* Message /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	//Set the message is not null
 	TSharedPtr<FJsonValue> JsonMessage = nullptr;
@@ -549,47 +532,47 @@ void USocketIOClientComponent::EmitWithGraphCallBack(const FString& EventName, s
 	}
 }
 
-void USocketIOClientComponent::EmitNative(const FString& EventName, const TSharedPtr<FJsonValue>& Message /*= nullptr*/, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitNative(const FString& EventName, const TSharedPtr<FJsonValue>& Message /*= nullptr*/, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	NativeClient->Emit(EventName, Message, CallbackFunction, Namespace);
 }
 
-void USocketIOClientComponent::EmitNative(const FString& EventName, const TSharedPtr<FJsonObject>& ObjectMessage /*= nullptr*/, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitNative(const FString& EventName, const TSharedPtr<FJsonObject>& ObjectMessage /*= nullptr*/, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	EmitNative(EventName, MakeShareable(new FJsonValueObject(ObjectMessage)), CallbackFunction, Namespace);
 }
 
-void USocketIOClientComponent::EmitNative(const FString& EventName, const FString& StringMessage /*= FString()*/, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitNative(const FString& EventName, const FString& StringMessage /*= FString()*/, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	EmitNative(EventName, MakeShareable(new FJsonValueString(StringMessage)), CallbackFunction, Namespace);
 }
 
-void USocketIOClientComponent::EmitNative(const FString& EventName, double NumberMessage, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitNative(const FString& EventName, double NumberMessage, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	EmitNative(EventName, MakeShareable(new FJsonValueNumber(NumberMessage)), CallbackFunction, Namespace);
 }
 
-void USocketIOClientComponent::EmitNative(const FString& EventName, const TArray<uint8>& BinaryMessage, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitNative(const FString& EventName, const TArray<uint8>& BinaryMessage, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	EmitNative(EventName, MakeShareable(new FJsonValueBinary(BinaryMessage)), CallbackFunction, Namespace);
 }
 
-void USocketIOClientComponent::EmitNative(const FString& EventName, const TArray<TSharedPtr<FJsonValue>>& ArrayMessage, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitNative(const FString& EventName, const TArray<TSharedPtr<FJsonValue>>& ArrayMessage, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	EmitNative(EventName, MakeShareable(new FJsonValueArray(ArrayMessage)), CallbackFunction, Namespace);
 }
 
-void USocketIOClientComponent::EmitNative(const FString& EventName, bool BooleanMessage, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitNative(const FString& EventName, bool BooleanMessage, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	EmitNative(EventName, MakeShareable(new FJsonValueBoolean(BooleanMessage)), CallbackFunction, Namespace);
 }
 
-void USocketIOClientComponent::EmitNative(const FString& EventName, UStruct* Struct, const void* StructPtr, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitNative(const FString& EventName, UStruct* Struct, const void* StructPtr, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	EmitNative(EventName, USIOJConvert::ToJsonObject(Struct, (void*)StructPtr), CallbackFunction, Namespace);
 }
 
-void USocketIOClientComponent::EmitNative(const FString& EventName, const SIO_TEXT_TYPE StringMessage /*= TEXT("")*/, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
+void USocketIOSubSystem::EmitNative(const FString& EventName, const SIO_TEXT_TYPE StringMessage /*= TEXT("")*/, TFunction< void(const TArray<TSharedPtr<FJsonValue>>&)> CallbackFunction /*= nullptr*/, const FString& Namespace /*= FString(TEXT("/"))*/)
 {
 	EmitNative(EventName, MakeShareable(new FJsonValueString(FString(StringMessage))), CallbackFunction, Namespace);
 }
@@ -599,7 +582,7 @@ void USocketIOClientComponent::EmitNative(const FString& EventName, const SIO_TE
 #pragma region OnEvents
 #endif
 
-void USocketIOClientComponent::BindEventToGenericEvent(const FString& EventName, const FString& Namespace)
+void USocketIOSubSystem::BindEventToGenericEvent(const FString& EventName, const FString& Namespace)
 {
 	NativeClient->OnEvent(EventName, [&](const FString& Event, const TSharedPtr<FJsonValue>& EventValue)
 	{
@@ -610,25 +593,37 @@ void USocketIOClientComponent::BindEventToGenericEvent(const FString& EventName,
 	}, Namespace);
 }
 
-void USocketIOClientComponent::BindEventToDelegate(const FString& EventName, 
-	const FSIOJsonValueSignature& CallbackDelegate, 
+void USocketIOSubSystem::BindEventToDelegate(const FString& EventName, 
+	const FSIOSubSystemJsonValueSignature& CallbackDelegate, 
 	const FString& Namespace /*= TEXT("/")*/,
 	ESIOThreadOverrideOption ThreadOverride /*= USE_DEFAULT*/)
 {
-	const FSIOJsonValueSignature SafeCallback = CallbackDelegate;	//copy for lambda ref
+	const FSIOSubSystemJsonValueSignature SafeCallback = CallbackDelegate;	//copy for lambda ref
 	OnNativeEvent(EventName, [&, SafeCallback](const FString& Event, const TSharedPtr<FJsonValue>& Message)
 	{
-		USIOJsonValue* Value = NewObject<USIOJsonValue>();
-		TSharedPtr<FJsonValue> NonConstValue = Message;
-		Value->SetRootValue(NonConstValue);
+		if (SafeCallback.IsBound())
+		{
+			FJsonObjectWrapper JsonObjectWrapper;
 
-		SafeCallback.ExecuteIfBound(Value);
+			if (Message.IsValid() && Message->Type == EJson::Object)
+			{
+				// Assuming Message is a valid JSON object, you can cast it to FJsonObject
+				const TSharedPtr<FJsonObject> JsonObj = Message->AsObject();
+
+				// Populate the JsonObjectWrapper with the JsonString and JsonObject
+				JsonObjectWrapper.JsonString = FString(); // You can assign a JSON string if needed
+				JsonObjectWrapper.JsonObject = JsonObj;
+			}
+
+			// Execute the delegate with the JsonObjectWrapper parameter
+			SafeCallback.Execute(JsonObjectWrapper);
+		}
 	}, Namespace, ThreadOverride);
 }
 
 
 
-void USocketIOClientComponent::BindEventToFunction(const FString& EventName,
+void USocketIOSubSystem::BindEventToFunction(const FString& EventName,
 	const FString& FunctionName,
 	UObject* Target, 
 	const FString& Namespace /*= FString(TEXT("/"))*/,
@@ -653,12 +648,12 @@ void USocketIOClientComponent::BindEventToFunction(const FString& EventName,
 	}
 }
 
-void USocketIOClientComponent::UnbindEvent(const FString& EventName, const FString& Namespace/* = TEXT("/")*/)
+void USocketIOSubSystem::UnbindEvent(const FString& EventName, const FString& Namespace/* = TEXT("/")*/)
 {
 	NativeClient->UnbindEvent(EventName, Namespace);
 }
 
-void USocketIOClientComponent::OnNativeEvent(const FString& EventName,
+void USocketIOSubSystem::OnNativeEvent(const FString& EventName,
 	TFunction< void(const FString&, const TSharedPtr<FJsonValue>&)> CallbackFunction,
 	const FString& Namespace /*= FString(TEXT("/"))*/,
 	ESIOThreadOverrideOption ThreadOverride /*= USE_DEFAULT*/)
@@ -669,3 +664,5 @@ void USocketIOClientComponent::OnNativeEvent(const FString& EventName,
 #if PLATFORM_WINDOWS
 #pragma endregion OnEvents
 #endif
+
+

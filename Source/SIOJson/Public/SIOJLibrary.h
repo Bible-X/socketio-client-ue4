@@ -55,7 +55,7 @@ class SIOJSON_API USIOJLibrary : public UBlueprintFunctionLibrary
 
 public:
 	/** Applies percent-encoding to text */
-	UFUNCTION(BlueprintCallable, Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility", meta=(DeprecatedFunction))
 		static FString PercentEncode(const FString& Source);
 
 	/**
@@ -64,7 +64,7 @@ public:
 	 * @param Source	The string data to convert
 	 * @return			A string that encodes the binary data in a way that can be safely transmitted via various Internet protocols
 	 */
-	UFUNCTION(BlueprintPure, Category = "z!!!DONT USE!!!", meta = (DisplayName = "Base64 Encode (String)"))
+	UFUNCTION(BlueprintPure, Category = "SIOJ|Utility", meta = (DisplayName = "Base64 Encode (String)", DeprecatedFunction))
 		static FString Base64Encode(const FString& Source);
 
 	/**
@@ -73,7 +73,7 @@ public:
 	 * @param Source	The string data to convert
 	 * @return			A string that encodes the binary data in a way that can be safely transmitted via various Internet protocols
 	 */
-	UFUNCTION(BlueprintPure, Category = "z!!!DONT USE!!!", meta = (DisplayName = "Base64 Encode (Bytes)"))
+	UFUNCTION(BlueprintPure, Category = "SIOJ|Utility", meta = (DisplayName = "Base64 Encode (Bytes)", DeprecatedFunction))
 		static FString Base64EncodeBytes(const TArray<uint8>& Source);
 
 	/**
@@ -83,7 +83,7 @@ public:
 	 * @param Dest		The out buffer that will be filled with the decoded data
 	 * @return			True if the buffer was decoded, false if it failed to decode
 	 */
-	UFUNCTION(BlueprintPure, Category = "z!!!DONT USE!!!", meta = (DisplayName = "Base64 Decode (To String)"))
+	UFUNCTION(BlueprintPure, Category = "SIOJ|Utility", meta = (DisplayName = "Base64 Decode (To String)", DeprecatedFunction))
 		static bool Base64Decode(const FString& Source, FString& Dest);
 
 
@@ -94,7 +94,7 @@ public:
 	 * @param Dest		The out buffer that will be filled with the decoded data
 	 * @return			True if the buffer was decoded, false if it failed to decode
 	 */
-	UFUNCTION(BlueprintPure, Category = "z!!!DONT USE!!!", meta = (DisplayName = "Base64 Decode (To Bytes)"))
+	UFUNCTION(BlueprintPure, Category = "SIOJ|Utility", meta = (DisplayName = "Base64 Decode (To Bytes)", DeprecatedFunction))
 		static bool Base64DecodeBytes(const FString& Source, TArray<uint8>& Dest);
 
 	//////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ public:
 	* @param JsonString				Input stringified json
 	* @param OutJsonValueArray		The decoded Array of JsonValue
 	*/
-	UFUNCTION(BlueprintPure, Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, Category = "SIOJ|Utility", meta=(DeprecatedFunction))
 		static bool StringToJsonValueArray(const FString& JsonString, TArray<USIOJsonValue*>& OutJsonValueArray);
 
 	/**
@@ -115,7 +115,7 @@ public:
 	* @param AnyStruct		The struct you wish to convert
 	* @return				Converted Json Object
 	*/
-	UFUNCTION(BlueprintPure, Category = "z!!!DONT USE!!!", CustomThunk, meta = (CustomStructureParam = "AnyStruct"))
+	UFUNCTION(BlueprintPure, Category = "SocketIOFunctions", CustomThunk, meta = (CustomStructureParam = "AnyStruct", DeprecatedFunction))
 		static USIOJsonObject* StructToJsonObject(TFieldPath<FProperty> AnyStruct);
 
 	//Convert property into c++ accessible form
@@ -137,7 +137,7 @@ public:
 		*(USIOJsonObject**)RESULT_PARAM = BPJsonObject;
 	}
 
-	UFUNCTION(BlueprintPure, CustomThunk, meta = (DisplayName = "To JsonValue (Struct)", BlueprintAutocast, CustomStructureParam = "AnyStruct"), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, CustomThunk, meta = (DisplayName = "To JsonValue (Struct)", BlueprintAutocast, CustomStructureParam = "AnyStruct", DeprecatedFunction), Category = "Utilities|SocketIO")
 	static USIOJsonValue* StructToJsonValue(TFieldPath<FProperty> AnyStruct);
 
 	DECLARE_FUNCTION(execStructToJsonValue)
@@ -167,7 +167,7 @@ public:
 	* @param AnyStruct		The struct you wish to fill
 	* @return				Whether all properties filled correctly
 	*/
-	UFUNCTION(BlueprintCallable, Category = "z!!!DONT USE!!!", CustomThunk, meta = (CustomStructureParam = "AnyStruct"))
+	UFUNCTION(BlueprintCallable, Category = "SocketIOFunctions", CustomThunk, meta = (CustomStructureParam = "AnyStruct", DeprecatedFunction))
 	static bool JsonObjectToStruct(USIOJsonObject* JsonObject, TFieldPath<FProperty> AnyStruct);
 
 	DECLARE_FUNCTION(execJsonObjectToStruct)
@@ -188,10 +188,10 @@ public:
 	}
 
 	//Convenience - Saving/Loading structs from files
-	UFUNCTION(BlueprintCallable, Category = "z!!!DONT USE!!!", CustomThunk, meta = (CustomStructureParam = "AnyStruct"))
+	UFUNCTION(BlueprintCallable, Category = "SocketIOFunctions", CustomThunk, meta = (CustomStructureParam = "AnyStruct", DeprecatedFunction))
 	static bool SaveStructToJsonFile(TFieldPath<FProperty> AnyStruct, const FString& FilePath);
 
-	UFUNCTION(BlueprintCallable, Category = "z!!!DONT USE!!!", CustomThunk, meta = (CustomStructureParam = "AnyStruct"))
+	UFUNCTION(BlueprintCallable, Category = "SocketIOFunctions", CustomThunk, meta = (CustomStructureParam = "AnyStruct", DeprecatedFunction))
 	static bool LoadJsonFileToStruct(const FString& FilePath, TFieldPath<FProperty> AnyStruct);
 
 	//custom thunk needed to handle wildcard structs
@@ -228,68 +228,68 @@ public:
 	//Conversion Nodes - comments added for blueprint hover with compact nodes
 
 	//To JsonValue (Array)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Array)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Array)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static USIOJsonValue* Conv_ArrayToJsonValue(const TArray<USIOJsonValue*>& InArray);
 
 	//To JsonValue (JsonObject)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (JsonObject)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (JsonObject)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static USIOJsonValue* Conv_JsonObjectToJsonValue(USIOJsonObject* InObject);
 
 	//To JsonValue (Bytes)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Bytes)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Bytes)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static USIOJsonValue* Conv_BytesToJsonValue(const TArray<uint8>& InBytes);
 
 	//To JsonValue (String)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (String)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (String)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static USIOJsonValue* Conv_StringToJsonValue(const FString& InString);
 
 	//To JsonValue (Integer)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Integer)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Integer)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static USIOJsonValue* Conv_IntToJsonValue(int32 InInt);
 
 	//To JsonValue (Float)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Float)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Float)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static USIOJsonValue* Conv_FloatToJsonValue(float InFloat);
 
 	//To JsonValue (Bool)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Bool)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To JsonValue (Bool)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static USIOJsonValue* Conv_BoolToJsonValue(bool InBool);
 
 	//To String (JsonValue) - doesn't autocast due to get display name
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To String (JsonValue)", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To String (JsonValue)", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static FString Conv_SIOJsonValueToString(class USIOJsonValue* InValue);
 
 	//To Integer (JsonValue)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Integer (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Integer (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static int32 Conv_JsonValueToInt(class USIOJsonValue* InValue);
 
 	//To Float (JsonValue)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Float (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Float (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static float Conv_JsonValueToFloat(class USIOJsonValue* InValue);
 
 	//To Bool (JsonValue)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bool (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bool (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static bool Conv_JsonValueToBool(class USIOJsonValue* InValue);
 
 	//To Bytes (JsonValue)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static TArray<uint8> Conv_JsonValueToBytes(class USIOJsonValue* InValue);
 
 	//To String (JsonObject) - doesn't autocast due to get display name
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To String (JsonObject)", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To String (JsonObject)", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static FString Conv_SIOJsonObjectToString(class USIOJsonObject* InObject);
 
 	//To Object (JsonValue)
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Object (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast), Category = "z!!!DONT USE!!!")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Object (JsonValue)", CompactNodeTitle = "->", BlueprintAutocast, DeprecatedFunction), Category = "Utilities|SocketIO")
 	static USIOJsonObject* Conv_JsonValueToJsonObject(class USIOJsonValue* InValue);
 
 public:
 	/** Easy way to process http requests */
-	UFUNCTION(BlueprintCallable, Category = "z!!!DONT USE!!!", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility", meta = (WorldContext = "WorldContextObject", DeprecatedFunction))
 	static void CallURL(UObject* WorldContextObject, const FString& URL, ESIORequestVerb Verb, ESIORequestContentType ContentType, USIOJsonObject* SIOJJson, const FSIOJCallDelegate& Callback);
 
 	/** Easy way to fetch resources using get */
-	UFUNCTION(BlueprintCallable, Category = "z!!!DONT USE!!!", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility", meta = (Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject", DeprecatedFunction))
 	static void GetURLBinary(UObject* WorldContextObject, const FString& URL, ESIORequestVerb Verb, ESIORequestContentType ContentType, TArray<uint8>& OutResultData, struct FLatentActionInfo LatentInfo);
 
 	/** Called when URL is processed (one for both success/unsuccess events)*/

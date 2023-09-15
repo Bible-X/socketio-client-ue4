@@ -1,45 +1,50 @@
-// Copyright 2018-current Getnamo. All Rights Reserved
-
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
-#include "Components/ActorComponent.h"
+#include "CoreMinimal.h"
+#include "Subsystems/GameInstanceSubsystem.h"
+#include "JsonObjectWrapper.h"
 #include "SocketIONative.h"
 #include "Runtime/Engine/Classes/Engine/LatentActionManager.h"
-#include "SocketIOClientComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSIOCEventSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSIOCSocketEventSignature, FString, Namespace);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FSIOCOpenEventSignature, FString, SocketId, FString, SessionId, bool, bIsReconnection);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSIOCCloseEventSignature, TEnumAsByte<ESIOConnectionCloseReason>, Reason);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FSIOCEventJsonSignature, FString, EventName, class USIOJsonValue*, EventData);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FSIOConnectionProblemSignature, int32, Attempts, int32,  NextAttemptInMs, float, TimeSinceConnected);
+#include "SocketIOSubSystem.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSIOCSubSystemEventSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSIOCSubSystemSocketEventSignature, FString, Namespace);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FSIOCSubSystemOpenEventSignature, FString, SocketId, FString, SessionId, bool, bIsReconnection);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSIOCSubSystemCloseEventSignature, TEnumAsByte<ESIOConnectionCloseReason>, Reason);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FSIOCSubSystemEventJsonSignature, FString, EventName, class USIOJsonValue*, EventData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FSIOSubSystemConnectionProblemSignature, int32, Attempts, int32,  NextAttemptInMs, float, TimeSinceConnected);
 
 //For Direct Delegate Event Bind
-DECLARE_DYNAMIC_DELEGATE_OneParam(FSIOJsonValueSignature, USIOJsonValue*, EventData);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FSIOSubSystemJsonValueSignature, FJsonObjectWrapper, EventData);
 
-UCLASS(BlueprintType, ClassGroup = "Networking", meta = (BlueprintSpawnableComponent, DeprecatedNode))
-class SOCKETIOCLIENT_API USocketIOClientComponent : public UActorComponent
+/**
+ * 
+ */
+UCLASS()
+class SOCKETIOCLIENT_API USocketIOSubSystem : public UGameInstanceSubsystem
 {
-	GENERATED_UCLASS_BODY()
-public:
+	GENERATED_BODY()
 
+public:
 	//Async events
 
 	/** On generic bound event received. Requires Bind Event to Generic Event to be called before. Will not receive Bind Event To Function events. */
-	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events", meta=(DeprecatedProperty))
-	FSIOCEventJsonSignature OnGenericEvent;
+	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events")
+	FSIOCSubSystemEventJsonSignature OnGenericEvent;
 
 	/** Received on socket.io connection established. */
-	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events", meta=(DeprecatedProperty))
-	FSIOCOpenEventSignature OnConnected;
+	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events")
+	FSIOCSubSystemOpenEventSignature OnConnected;
 
 	/** 
 	* Received on socket.io connection disconnected. This may never get 
 	* called in default settings, see OnConnectionProblems event for details. 
 	*/
-	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events", meta=(DeprecatedProperty))
-	FSIOCCloseEventSignature OnDisconnected;
+	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events")
+	FSIOCSubSystemCloseEventSignature OnDisconnected;
 
 	/** 
 	* Received when connection problems arise. In default settings the
@@ -47,32 +52,32 @@ public:
 	* amount of times and you may never get OnDisconnected callback
 	* unless you call it.
 	*/
-	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events", meta=(DeprecatedProperty))
-	FSIOConnectionProblemSignature OnConnectionProblems;
+	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events")
+	FSIOSubSystemConnectionProblemSignature OnConnectionProblems;
 
 	/** Received on having joined namespace. */
-	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events", meta=(DeprecatedProperty))
-	FSIOCSocketEventSignature OnSocketNamespaceConnected;
+	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events")
+	FSIOCSubSystemSocketEventSignature OnSocketNamespaceConnected;
 
 	/** Received on having left namespace. */
-	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events", meta=(DeprecatedProperty))
-	FSIOCSocketEventSignature OnSocketNamespaceDisconnected;
+	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events")
+	FSIOCSubSystemSocketEventSignature OnSocketNamespaceDisconnected;
 
 	/** Received on connection failure. */
-	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events", meta=(DeprecatedProperty))
-	FSIOCEventSignature OnFail;
+	UPROPERTY(BlueprintAssignable, Category = "SocketIO Events")
+	FSIOCSubSystemEventSignature OnFail;
 
 
 	/**
 	* Default connection params used on e.g. on begin play. Can be updated and re-used on custom connection.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties")
 	FSIOConnectParams URLParams;
 
 	/**
 	* Will force using TLS even if url doesn't have https:// prepend.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties")
 	bool bForceTLS;
 
 	/**
@@ -80,7 +85,7 @@ public:
 	* Useful for cleanup if typically binding on connection and there
 	* are no early event binds (before connection).
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties")
 	bool bUnbindEventsOnDisconnect;
 
 	/**
@@ -90,35 +95,35 @@ public:
 	* NOTE: Certification verification is currently not implemented; setting to true will
 	* always fail verification.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties")
 	bool bShouldVerifyTLSCertificate;
 
 	/** If true will auto-connect on begin play to address specified in AddressAndPort. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties")
 	bool bShouldAutoConnect;
 
 	/** Delay between reconnection attempts */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties")
 	int32 ReconnectionDelayInMs;
 
 	/**
 	* Number of times the connection should try before giving up.
 	* Default: infinity, this means you never truly disconnect, just suffer connection problems 
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties")
 	int32 MaxReconnectionAttempts;
 
 	/** Optional parameter to limit reconnections by elapsed time. Default: infinity. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties")
 	float ReconnectionTimeout;
 
 	FDateTime TimeWhenConnectionProblemsStarted;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Connection Properties")
 	bool bVerboseConnectionLog;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Scope Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Scope Properties")
 	bool bLimitConnectionToGameWorld;
 
 	/** 
@@ -127,29 +132,29 @@ public:
 	* or close the app. The latest connection with the same PluginScopedId will use the same connection
 	* as the previous one and receive the same events.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Scope Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Scope Properties")
 	bool bPluginScopedConnection;
 
 	/** If you leave this as is all plugin scoped connection components will share same connection*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Scope Properties", meta=(DeprecatedProperty))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SocketIO Scope Properties")
 	FString PluginScopedId;
 
-	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties")
 	bool bIsConnected;
 
 	/** When connected this session id will be valid and contain a unique Id. */
-	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties")
 	FString SessionId;
 
 	/** Each new connection is assigned a random 20-characters identifier. This identifier is synced with the value on the client-side. */
-	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties")
 	FString SocketId;
 
-	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties")
 	bool bIsHavingConnectionProblems;
 
 	/** If this component has been statically initialized. Largely exposed for traceability. */
-	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties", meta=(DeprecatedProperty))
+	UPROPERTY(BlueprintReadOnly, Category = "SocketIO Connection Properties")
 	bool bStaticallyInitialized;
 
 	/**
@@ -164,7 +169,7 @@ public:
 	* @param Auth socket.io authorization option as a SIOJsonObject with string keys and values
 	*
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta=(DeprecatedFunction))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions")
 	void Connect(	const FString& InAddressAndPort = TEXT(""),
 					const FString& InPath = TEXT("socket.io"),
 					const FString& InAuthToken = TEXT(""),
@@ -176,7 +181,7 @@ public:
 	*
 	* @param InURLParams - A struct holding address&port, path, headers, query, and auth params
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta=(DeprecatedFunction))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions")
 	void ConnectWithParams(const FSIOConnectParams& InURLParams);
 
 	/**
@@ -186,7 +191,7 @@ public:
 	*
 	* @param AddressAndPort	the address in URL format with port
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta=(DeprecatedFunction))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions")
 	void Disconnect();
 
 	void SyncDisconnect();
@@ -194,13 +199,13 @@ public:
 	/**
 	* Join a desired namespace. Keep in mind that emitting to a namespace will auto-join it
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta=(DeprecatedFunction))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions")
 	void JoinNamespace(const FString& Namespace);
 
 	/** 
 	* Leave a specified namespace. Should stop listening to events on given namespace.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta=(DeprecatedFunction))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions")
 	void LeaveNamespace(const FString& Namespace);
 
 	//
@@ -214,8 +219,8 @@ public:
 	* @param Message	SIOJJsonValue
 	* @param Namespace	Namespace within socket.io
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta=(DeprecatedFunction))
-	void Emit(const FString& EventName, USIOJsonValue* Message = nullptr, const FString& Namespace = TEXT("/"));
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions")
+	void Emit(const FString& EventName, const FJsonObjectWrapper& Message, const FString& Namespace = TEXT("/"));
 
 	/**
 	* Emit an event with a JsonValue message with a callback function defined by CallBackFunctionName
@@ -262,9 +267,9 @@ public:
 	* @param Namespace	Optional namespace, defaults to default namespace
 	* @param ThreadOverride	Optional override to receive event on specified thread. Note NETWORK thread is lower latency but unsafe for a lot of blueprint use. Use with CAUTION.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta=(DeprecatedFunction))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions")
 	void BindEventToDelegate(	const FString& EventName, 
-								const FSIOJsonValueSignature& CallbackDelegate, 
+								const FSIOSubSystemJsonValueSignature& CallbackDelegate, 
 								const FString& Namespace = TEXT("/"),
 								ESIOThreadOverrideOption ThreadOverride = USE_DEFAULT);
 
@@ -288,7 +293,7 @@ public:
 	* @param Namespace		Optional namespace, defaults to default namespace
 	* @param ThreadOverride	Optional override to receive event on specified thread. Note NETWORK thread is lower latency but unsafe for a lot of blueprint use. Use with CAUTION.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta = (WorldContext = "WorldContextObject", DeprecatedFunction))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta = (WorldContext = "WorldContextObject"))
 	void BindEventToFunction(	const FString& EventName,
 								const FString& FunctionName,
 								UObject* Target,
@@ -302,7 +307,7 @@ public:
 	* @param EventName	Event name
 	* @param Namespace	Optional namespace, defaults to default namespace
 	*/
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions", meta=(DeprecatedFunction))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Functions")
 	void UnbindEvent(const FString& EventName, const FString& Namespace = TEXT("/"));
 
 
@@ -474,11 +479,11 @@ public:
 	/** Called by SocketIOFunctionLibrary to initialize statically constructed components. */
 	void StaticInitialization(UObject* WorldContextObject, bool bValidOwnerWorld);
 
-	virtual void InitializeComponent() override;
-	virtual void UninitializeComponent() override;
-	virtual void BeginPlay() override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
-	~USocketIOClientComponent();
+	USocketIOSubSystem();
+	virtual ~USocketIOSubSystem() override;
 	
 protected:
 	void SetupCallbacks();
@@ -490,4 +495,5 @@ protected:
 
 	FCriticalSection AllocationSection;
 	TSharedPtr<FSocketIONative> NativeClient;
+	
 };

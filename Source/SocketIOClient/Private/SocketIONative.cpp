@@ -302,9 +302,9 @@ void FSocketIONative::OnEvent(const FString& EventName,
 }
 
 void FSocketIONative::OnRawEvent(const FString& EventName, 
-                                 TFunction< void(const FString&, const sio::message::ptr&)> CallbackFunction, 
-                                 const FString& Namespace /*= FString(TEXT("/"))*/,
-                                 ESIOThreadOverrideOption CallbackThread /*= USE_DEFAULT*/)
+	TFunction< void(const FString&, const sio::message::ptr&)> CallbackFunction, 
+	const FString& Namespace /*= FString(TEXT("/"))*/,
+	ESIOThreadOverrideOption CallbackThread /*= USE_DEFAULT*/)
 {
 	if (CallbackFunction == nullptr)
 	{

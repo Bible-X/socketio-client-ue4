@@ -18,10 +18,10 @@ class SOCKETIOCLIENT_API USocketIOFunctionLibrary : public UBlueprintFunctionLib
 public:
 
 	/** Static function to spawn a component that doesn't attach */
-	UFUNCTION(BlueprintCallable, Category = "SocketIO Client Static", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Client Static", meta = (WorldContext = "WorldContextObject", DeprecatedFunction))
 	static USocketIOClientComponent* ConstructSocketIOComponent(UObject* WorldContextObject);
 
 	/** Call a function by name with SIOJsonValue signature. Utility for RPC in BPs*/
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SocketIO Utility", meta = (WorldContext = "WorldContextObject", DeprecatedFunction))
 	static bool CallFunctionByName(const FString& FunctionName, UObject* Target, UObject* WorldContextObject, USIOJsonValue* Param);
 };

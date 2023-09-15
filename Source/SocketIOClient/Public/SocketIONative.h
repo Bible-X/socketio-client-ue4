@@ -9,7 +9,6 @@
 #include "SIOJConvert.h"
 #include "SIOMessageConvert.h"
 #include "CoreMinimal.h"
-#include "JsonObjectWrapper.h"
 
 UENUM(BlueprintType)
 enum ESIOConnectionCloseReason

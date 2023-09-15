@@ -32,17 +32,17 @@ struct FSIOJ_NamedType
 {
 	GENERATED_USTRUCT_BODY();
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = NamedType)
 	FString Name;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = NamedType)
 	ESIOJ_JsonType Type = ESIOJ_JsonType::JSON_Bool;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = NamedType)
 	bool bIsArray = false;
 };
 
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable, meta=(DeprecatedNode))
 class SIOJEDITORPLUGIN_API USIOJ_BreakJson : public UK2Node
 {
 	GENERATED_UCLASS_BODY()
@@ -67,7 +67,7 @@ protected:
 	virtual void CreateProjectionPins(UEdGraphPin *Source);
 
 public:
-	UPROPERTY(EditAnywhere, Category = PinOptions)
+	UPROPERTY(EditAnywhere, Category = PinOptions, meta=(DeprecatedProperty))
 	TArray<FSIOJ_NamedType> Outputs;
 
 };

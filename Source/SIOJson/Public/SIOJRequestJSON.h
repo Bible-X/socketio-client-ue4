@@ -83,7 +83,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnStaticRequestFail, class USIOJRequestJSON
 /**
  * General helper class http requests via blueprints
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable, meta=(DeprecatedNode))
 class SIOJSON_API USIOJRequestJSON : public UObject
 {
 	GENERATED_UCLASS_BODY()
@@ -93,36 +93,36 @@ public:
 	// Construction
 
 	/** Creates new request (totally empty) */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Construct Json Request (Empty)", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject", DeprecatedFunction), Category = "SIOJ|Request")
 	static USIOJRequestJSON* ConstructRequest(UObject* WorldContextObject);
 
 	/** Creates new request with defined verb and content type */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Construct Json Request", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject", DeprecatedFunction), Category = "SIOJ|Request")
 	static USIOJRequestJSON* ConstructRequestExt(UObject* WorldContextObject, ESIORequestVerb Verb, ESIORequestContentType ContentType);
 
 	/** Set verb to the request */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	void SetVerb(ESIORequestVerb Verb);
 
 	/** Set custom verb to the request */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	void SetCustomVerb(FString Verb);
 
 	/** Set content type to the request. If you're using the x-www-form-urlencoded, 
 	 * params/constaints should be defined as key=ValueString pairs from Json data */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	void SetContentType(ESIORequestContentType ContentType);
 
 	/** Set content type of the request for binary post data */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	void SetBinaryContentType(const FString &ContentType);
 
 	/** Set content of the request for binary post data */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	void SetBinaryRequestContent(const TArray<uint8> &Content);
 
 	/** Sets optional header info */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	void SetHeader(const FString& HeaderName, const FString& HeaderValue);
 
 
@@ -130,19 +130,19 @@ public:
 	// Destruction and reset
 
 	/** Reset all internal saved data */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility", meta=(DeprecatedFunction))
 	void ResetData();
 
 	/** Reset saved request data */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	void ResetRequestData();
 
 	/** Reset saved response data */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response", meta=(DeprecatedFunction))
 	void ResetResponseData();
 
 	/** Cancel latent response waiting  */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response", meta=(DeprecatedFunction))
 	void Cancel();
 
 
@@ -150,19 +150,19 @@ public:
 	// JSON data accessors
 
 	/** Get the Request Json object */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	USIOJsonObject* GetRequestObject();
 
 	/** Set the Request Json object */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	void SetRequestObject(USIOJsonObject* JsonObject);
 
 	/** Get the Response Json object */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response", meta=(DeprecatedFunction))
 	USIOJsonObject* GetResponseObject();
 
 	/** Set the Response Json object */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response", meta=(DeprecatedFunction))
 	void SetResponseObject(USIOJsonObject* JsonObject);
 
 
@@ -170,34 +170,34 @@ public:
 	// Request/response data access
 
 	/** Get url of http request */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	FString GetURL();
 
 	/** Get status of http request */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	ESIORequestStatus GetStatus();
 
 	/** Get the response code of the last query */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response", meta=(DeprecatedFunction))
 	int32 GetResponseCode();
 
 	/** Get value of desired response header */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response", meta=(DeprecatedFunction))
 	FString GetResponseHeader(const FString HeaderName);
 	
 	/** Get list of all response headers */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Response", meta=(DeprecatedFunction))
 	TArray<FString> GetAllResponseHeaders();
 
 	//////////////////////////////////////////////////////////////////////////
 	// URL processing
 
 	/** Open URL with current setup */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta=(DeprecatedFunction))
 	virtual void ProcessURL(const FString& Url = TEXT("http://alyamkin.com"));
 
 	/** Open URL in latent mode */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Request", meta = (Latent, LatentInfo = "LatentInfo", HidePin = "WorldContextObject", DefaultToSelf = "WorldContextObject", DeprecatedFunction))
 	virtual void ApplyURL(const FString& Url, USIOJsonObject *&Result, UObject* WorldContextObject, struct FLatentActionInfo LatentInfo);
 
 	/** Apply current internal setup to request and process it */
@@ -215,11 +215,11 @@ private:
 
 public:
 	/** Event occured when the request has been completed */
-	UPROPERTY()
+	UPROPERTY(BlueprintAssignable, Category = "SIOJ|Event", meta=(DeprecatedProperty))
 	FOnRequestComplete OnRequestComplete;
 
 	/** Event occured when the request wasn't successfull */
-	UPROPERTY()
+	UPROPERTY(BlueprintAssignable, Category = "SIOJ|Event", meta=(DeprecatedProperty))
 	FOnRequestFail OnRequestFail;
 	
 	/** Event occured when the request has been completed */
@@ -234,7 +234,7 @@ public:
 
 public:
 	/** Add tag to this request */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility", meta=(DeprecatedFunction))
 	void AddTag(FName Tag);
 
 	/** 
@@ -242,11 +242,11 @@ public:
 	 *
 	 * @return Number of removed elements 
 	 */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility", meta=(DeprecatedFunction))
 	int32 RemoveTag(FName Tag);
 
 	/** See if this request contains the supplied tag */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "SIOJ|Utility", meta=(DeprecatedFunction))
 	bool HasTag(FName Tag) const;
 
 protected:
@@ -259,15 +259,15 @@ protected:
 
 public:
 	/** Request response stored as a string */
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SIOJ|Response", meta=(DeprecatedProperty))
 	FString ResponseContent;
 
 	/** Is the response valid JSON? */
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SIOJ|Response", meta=(DeprecatedProperty))
 	bool bIsValidJsonResponse;
 
 	/** If this is true it will call back on the binary callback instead of json */
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SIOJ|Response", meta=(DeprecatedProperty))
 	bool bShouldHaveBinaryResponse;
 
 	TFunction<void(TArray<uint8>&)> OnProcessURLCompleteCallback;
